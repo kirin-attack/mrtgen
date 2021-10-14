@@ -30,7 +30,12 @@ An example is provided in `bomb.mrt.bz2`, an artificial dump of 2.1M IPv6 routes
 
 # Requirements
 
- * [splitter](https://github.com/BGP-TDI/splitter), eg:
+ * [ryu](https://github.com/faucetsdn/ryu): a component-based software defined networking framework, eg:
+ ```
+ # optional: use virtualenv instead (https://virtualenv.pypa.io/)
+ $ sudo -H pip3 install --upgrade ryu
+ ```
+ * optional: [splitter](https://github.com/BGP-TDI/splitter) - IPv6 prefix splitter, eg:
  ```
  $ git clone git@github.com:BGP-TDI/splitter.git
  $ cd splitter
@@ -40,12 +45,8 @@ An example is provided in `bomb.mrt.bz2`, an artificial dump of 2.1M IPv6 routes
 2001:db8::/48
 2001:db8:1::/48
  ```
- * [ryu](https://github.com/faucetsdn/ryu): a component-based software defined networking framework, eg:
- ```
- # optional: use virtualenv instead (https://virtualenv.pypa.io/)
- $ sudo -H pip3 install --upgrade ryu
- ```
- * [rtbrick/bgpdump2](https://github.com/rtbrick/bgpdump2) - bgpdump2 with a BGP blaster mode (optional)
+ 
+ * optional: [rtbrick/bgpdump2](https://github.com/rtbrick/bgpdump2) - bgpdump2 with a BGP blaster mode
  ```
  # recommended to use local version due to compile errors
  $ git clone git@github.com:BGP-TDI/bgpdump2.git
