@@ -74,7 +74,7 @@ $ ls -lh bomb.mrt.bz2
 
 3. Blast the file at a BGP speaker:
 ```
-bgpdump2 -6 -v -B fc00::2 -S fc00::3 -a 65001 -- ./bomb.mrt.bz2
+$ bgpdump2 -6 -v -B fc00::2 -S fc00::3 -a 65001 -- ./bomb.mrt.bz2
 ```
 * `-6` means IPv6 routes (required)
 * `-v` means verbose operation (optional)
