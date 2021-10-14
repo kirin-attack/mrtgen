@@ -4,7 +4,27 @@ This Python script writes synthetic MRT RIB dumps (in [TABLE_DUMP_V2](https://da
 
 Each line of the stdin must be an IPv4 or IPv6 prefix.
 
-Some properties of the MRT file can be set using command-line options (see `mrtgen.py --help`).
+Some properties of the MRT file can be set using command-line options (see `mrtgen.py --help`):
+```
+$ ./mrtgen.py --help
+usage: mrtgen.py [-h] [--me ME] [--id ID] [--ip IP] [--asn ASN] [--aspath ASPATH [ASPATH ...]] [--nh4 NH4] [--nh6 NH6] TARGET
+
+Generate MRT RIB files (TABLE_DUMP_V2 format)
+
+positional arguments:
+  TARGET                target file
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --me ME               my BGP identifier (default: 192.168.99.3)
+  --id ID               peer BGP identifier (default: 192.168.99.1)
+  --ip IP               peer IP address (default: 192.168.99.1)
+  --asn ASN             peer ASN (default: 65001)
+  --aspath ASPATH [ASPATH ...]
+                        AS_PATH attribute (default: [65001])
+  --nh4 NH4             Next-Hop IPv4 address (default: 192.168.99.1)
+  --nh6 NH6             Next-Hop IPv6 address (default: fc00::1)
+```
 
 An example is provided in `bomb.mrt.bz2`, an artificial dump of 2.1M IPv6 routes to subnets of `2000::/28` (all possible longer prefixes, up to `/48`).
 
