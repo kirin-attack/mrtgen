@@ -67,7 +67,7 @@ $ wc -l input.txt
 
 2. Convert the input into an MRT file, for example:
 ```
-$ cat input.txt | ./gen.py bomb.mrt.bz2
+$ cat input.txt | ./mrtgen.py bomb.mrt.bz2
 $ ls -lh bomb.mrt.bz2 
 -rw-rw-r-- 1 pjf pjf 7.5M Oct 14 13:44 bomb.mrt.bz2
 ```
