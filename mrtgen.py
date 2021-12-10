@@ -18,11 +18,15 @@ p.add_argument('--me', type=str, default='192.168.99.3', help='my BGP identifier
 p.add_argument('--id', type=str, default='192.168.99.1', help='peer BGP identifier')
 p.add_argument('--ip', type=str, default='192.168.99.1', help='peer IP address')
 p.add_argument('--asn', type=int, default=65001, help='peer ASN')
-p.add_argument('--aspath', type=int, nargs='+', default=[65001], help='AS_PATH attribute')
+p.add_argument('--aspath', action="append", help='AS_PATH attribute. Specify multiple times to alternate announcements')
 p.add_argument('--nh4', type=str, default='192.168.99.1', help='Next-Hop IPv4 address')
 p.add_argument('--nh6', type=str, default='fc00::1', help='Next-Hop IPv6 address')
 
 args = p.parse_args()
+
+# Set aspath to default, does not properly work with append action
+if not args.aspath:
+	args.aspath = [ "65001" ]
 
 # open target file for writing
 if args.target.endswith(".bz2"):
@@ -43,12 +47,18 @@ via4 = mrtlib.MrtRibEntry(0, now, [
 	bgp.BGPPathAttributeAsPath([args.aspath], '!I'),
 	bgp.BGPPathAttributeNextHop(args.nh4),
 ])
-via6 = mrtlib.MrtRibEntry(0, now, [
-	bgp.BGPPathAttributeOrigin(0),
-	bgp.BGPPathAttributeAsPath([args.aspath], '!I'),
-	# this must be last
-	bgp.BGPPathAttributeMpReachNLRI(afi.IP6, safi.UNICAST, [args.nh6], []),
-])
+via6 = []
+for aspath in args.aspath:
+
+	# Convert to list of lists containing integers
+	aspath = [[int(x)] for x in aspath.split(",")]
+
+	via6.append(mrtlib.MrtRibEntry(0, now, [
+		bgp.BGPPathAttributeOrigin(0),
+		bgp.BGPPathAttributeAsPath(aspath, '!I'),
+		# this must be last
+		bgp.BGPPathAttributeMpReachNLRI(afi.IP6, safi.UNICAST, [args.nh6], []),
+	]))
 
 # write RIB entries
 seq = 0
@@ -59,9 +69,10 @@ for line in sys.stdin:
 		addr, slash, plen = line.partition("/")
 
 		if ":" in addr:
+			curr_via6 = via6[seq%len(via6)]
 			prefix = bgp.IP6AddrPrefix(int(plen), addr)
-			via6.bgp_attributes[-1].nlri = [prefix]
-			msg = mrtlib.TableDump2RibIPv6UnicastMrtMessage(seq, prefix, [via6])
+			curr_via6.bgp_attributes[-1].nlri = [prefix]
+			msg = mrtlib.TableDump2RibIPv6UnicastMrtMessage(seq, prefix, [curr_via6])
 		else:
 			prefix = bgp.IPAddrPrefix(int(plen), addr)
 			msg = mrtlib.TableDump2RibIPv4UnicastMrtMessage(seq, prefix, [via4])
