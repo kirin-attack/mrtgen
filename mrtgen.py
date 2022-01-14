@@ -21,7 +21,8 @@ p.add_argument('--asn', type=int, default=65001, help='peer ASN')
 p.add_argument('--aspath', action="append", help='AS_PATH attribute; specify multiple times to alternate announcements')
 p.add_argument('--nh4', type=str, default='192.168.99.1', help='Next-Hop IPv4 address')
 p.add_argument('--nh6', type=str, default='fc00::1', help='Next-Hop IPv6 address')
-p.add_argument('--comm', action="store_true", help='add a unique BGP community to each announcement')
+p.add_argument('--comm', action="store_true", help='add a unique COMMUNITY attribute to each announcement')
+p.add_argument('--aggr', action="store_true", help='add a unique AGGREGATOR attribute to each announcement')
 
 args = p.parse_args()
 
@@ -49,22 +50,30 @@ for aspath in args.aspath:
 	# convert to list of integers
 	aspath = [int(x) for x in aspath.split(",")]
 
-	via4.append(mrtlib.MrtRibEntry(0, now, [
-		bgp.BGPPathAttributeOrigin(0),
-		bgp.BGPPathAttributeAsPath([aspath], '!I'),
+	attr4 = [
 		bgp.BGPPathAttributeNextHop(args.nh4),
-		# must be [-1]
-		bgp.BGPPathAttributeCommunities([args.asn << 16]),
-	]))
-
-	via6.append(mrtlib.MrtRibEntry(0, now, [
 		bgp.BGPPathAttributeOrigin(0),
 		bgp.BGPPathAttributeAsPath([aspath], '!I'),
-		# must be [-2]
-		bgp.BGPPathAttributeMpReachNLRI(afi.IP6, safi.UNICAST, [args.nh6], []),
-		# must be [-1]
-		bgp.BGPPathAttributeCommunities([args.asn << 16]),
-	]))
+	]
+
+	attr6 = [
+		bgp.BGPPathAttributeMpReachNLRI(afi.IP6, safi.UNICAST, [args.nh6], []), # must be first
+		bgp.BGPPathAttributeOrigin(0),
+		bgp.BGPPathAttributeAsPath([aspath], '!I'),
+	]
+
+	if args.aggr:
+		attr = bgp.BGPPathAttributeAggregator(as_number=0, addr=args.id)
+		attr4.append(attr)
+		attr6.append(attr)
+
+	if args.comm:
+		attr = bgp.BGPPathAttributeCommunities([])
+		attr4.append(attr)
+		attr6.append(attr)
+
+	via4.append(mrtlib.MrtRibEntry(0, now, attr4))
+	via6.append(mrtlib.MrtRibEntry(0, now, attr6))
 
 # write RIB entries
 seq = 0
@@ -74,14 +83,18 @@ for line in sys.stdin:
 
 	try:
 		addr, slash, plen = line.partition("/")
-
+		last = -1
 		if ":" in addr:
 			prefix = bgp.IP6AddrPrefix(int(plen), addr)
 
 			via = via6[seq%len(via6)]
-			via.bgp_attributes[-2].nlri = [prefix]
+			via.bgp_attributes[0].nlri = [prefix]
+
 			if args.comm:
-				via.bgp_attributes[-1].communities = [comm]
+				via.bgp_attributes[last].communities = [comm]
+				last -= 1
+			if args.aggr:
+				via.bgp_attributes[last].as_number = seq + 1
 
 			msg = mrtlib.TableDump2RibIPv6UnicastMrtMessage(seq, prefix, [via])
 		else:
@@ -89,7 +102,10 @@ for line in sys.stdin:
 
 			via = via4[seq%len(via4)]
 			if args.comm:
-				via.bgp_attributes[-1].communities = [comm]
+				via.bgp_attributes[last].communities = [comm]
+				last -= 1
+			if args.aggr:
+				via.bgp_attributes[last].as_number = seq + 1
 
 			msg = mrtlib.TableDump2RibIPv4UnicastMrtMessage(seq, prefix, [via])
 

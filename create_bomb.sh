@@ -10,4 +10,10 @@ NEXT_HOP_IPV6=2001:0DB8:0:10::2
 
 source venv/bin/activate
 
-cat $1 | ./mrtgen.py --me $MY_BGP_ID --id $PEER_BGP_ID --ip $PEER_IP --asn $PEER_ASN --aspath $AS_PATH1 --aspath $AS_PATH2 --nh6 $NEXT_HOP_IPV6 $2
+INPUT="$1"
+shift
+
+cat "$INPUT" | ./mrtgen.py \
+    --me $MY_BGP_ID --id $PEER_BGP_ID --ip $PEER_IP --asn $PEER_ASN \
+    --aspath $AS_PATH1 --aspath $AS_PATH2 --nh6 $NEXT_HOP_IPV6 \
+    "$@"

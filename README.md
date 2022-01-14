@@ -20,10 +20,12 @@ optional arguments:
   --id ID               peer BGP identifier (default: 192.168.99.1)
   --ip IP               peer IP address (default: 192.168.99.1)
   --asn ASN             peer ASN (default: 65001)
-  --aspath ASPATH [ASPATH ...]
-                        AS_PATH attribute (default: [65001])
+  --aspath ASPATH       AS_PATH attribute
+                        specify multiple times to alternate announcements
   --nh4 NH4             Next-Hop IPv4 address (default: 192.168.99.1)
   --nh6 NH6             Next-Hop IPv6 address (default: fc00::1)
+  --comm                add a unique COMMUNITY attribute to each announcement (default: False)
+  --aggr                add a unique AGGREGATOR attribute to each announcement (default: False)
 ```
 
 An example is provided in `bomb.mrt.bz2`, an artificial dump of 2.1M IPv6 routes to subnets of `2000::/28` (all possible longer prefixes, up to `/48`).
@@ -41,7 +43,6 @@ An example is provided in `bomb.mrt.bz2`, an artificial dump of 2.1M IPv6 routes
  $ cd splitter
  $ go build
  $ ./splitter 2001:db8::/47
-2001:db8::/47
 2001:db8::/48
 2001:db8:1::/48
  ```
@@ -62,7 +63,7 @@ An example is provided in `bomb.mrt.bz2`, an artificial dump of 2.1M IPv6 routes
 ```
 $ ../splitter/splitter 2000::/28 > input.txt
 $ wc -l input.txt 
-2097151 input.txt
+2097150 input.txt
 ```
 
 2. Convert the input into an MRT file, for example:
