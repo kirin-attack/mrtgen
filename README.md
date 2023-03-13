@@ -37,9 +37,9 @@ An example is provided in `bomb.mrt.bz2`, an artificial dump of 2.1M IPv6 routes
  # optional: use virtualenv instead (https://virtualenv.pypa.io/)
  $ sudo -H pip3 install --upgrade ryu
  ```
- * optional: [splitter](https://github.com/BGP-TDI/splitter) - IPv6 prefix splitter, eg:
+ * optional: [splitter](https://github.com/kirin-attack/splitter) - IPv6 prefix splitter, eg:
  ```
- $ git clone git@github.com:BGP-TDI/splitter.git
+ $ git clone git@github.com:kirin-attack/splitter.git
  $ cd splitter
  $ go build
  $ ./splitter 2001:db8::/47
@@ -50,7 +50,7 @@ An example is provided in `bomb.mrt.bz2`, an artificial dump of 2.1M IPv6 routes
  * optional: [rtbrick/bgpdump2](https://github.com/rtbrick/bgpdump2) - bgpdump2 with a BGP blaster mode
  ```
  # recommended to use local version due to compile errors
- $ git clone git@github.com:BGP-TDI/bgpdump2.git
+ $ git clone git@github.com:kirin-attack/bgpdump2.git
  $ cd bgpdump2
  $ ./configure --prefix=$HOME/local
  $ make
@@ -59,7 +59,7 @@ An example is provided in `bomb.mrt.bz2`, an artificial dump of 2.1M IPv6 routes
 
 # Usage
 
-1. Prepare input - a list of IPv6 prefixes, for example using [splitter](https://github.com/BGP-TDI/splitter):
+1. Prepare input - a list of IPv6 prefixes, for example using [splitter](https://github.com/kirin-attack/splitter):
 ```
 $ ../splitter/splitter 2000::/28 > input.txt
 $ wc -l input.txt 
